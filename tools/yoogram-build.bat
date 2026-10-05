@@ -83,12 +83,16 @@ timeout /t 15 /nobreak >nul
 goto prepare
 :prepared
 
-rem The app links FFmpeg as lib<name>.a (cmake_helpers), but an MSVC build of
-rem FFmpeg may leave lib<name>.lib. A copy under the expected name is harmless.
+rem The app links FFmpeg as lib<name>/lib<name>.a (cmake_helpers), but the MSVC
+rem build of FFmpeg leaves <name>.lib (no "lib" prefix) in the same folder. A
+rem copy under the expected name is harmless (they are normal MSVC archives).
 set "FFDIR=%REPO%\..\Libraries\win64\ffmpeg"
 for %%L in (avfilter avformat avcodec swresample swscale avutil) do (
   if not exist "!FFDIR!\lib%%L\lib%%L.a" (
-    if exist "!FFDIR!\lib%%L\lib%%L.lib" (
+    if exist "!FFDIR!\lib%%L\%%L.lib" (
+      echo FFmpeg: copying %%L.lib to lib%%L.a
+      copy /y "!FFDIR!\lib%%L\%%L.lib" "!FFDIR!\lib%%L\lib%%L.a" >nul
+    ) else if exist "!FFDIR!\lib%%L\lib%%L.lib" (
       echo FFmpeg: copying lib%%L.lib to lib%%L.a
       copy /y "!FFDIR!\lib%%L\lib%%L.lib" "!FFDIR!\lib%%L\lib%%L.a" >nul
     )
