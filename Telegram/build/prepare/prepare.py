@@ -146,6 +146,8 @@ envForThirdPartyKey = hashlib.sha1(envForThirdPartyKeyString.encode('utf-8')).he
 modifiedEnv = os.environ.copy()
 for key in environment:
     modifiedEnv[key] = environment[key]
+# Not part of "environment" on purpose: it must not change the cache keys.
+modifiedEnv['PREPARE_DIR'] = scriptPath
 if win and 'NoDefaultCurrentDirectoryInExePath' in modifiedEnv:
     del modifiedEnv['NoDefaultCurrentDirectoryInExePath']
 
@@ -1111,6 +1113,7 @@ stage('ffmpeg', """
 win:
 depends:patches/ffmpeg.patch
     git apply ../patches/ffmpeg.patch
+    python "%PREPARE_DIR%\\ffmpeg_msvc_locale.py"
 
     SET PATH=%THIRDPARTY_DIR%\\msys64\\usr\\bin;%PATH%
     SET CHERE_INVOKING=enabled_from_arguments
